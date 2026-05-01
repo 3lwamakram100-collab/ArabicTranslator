@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ali Translation | الترجمة الصوتية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a0b2e, #2d1b4e, #1a0b2e);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated purple glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(156, 39, 176, 0.15), transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(156, 39, 176, 0.3);
+            pointer-events: none;
+            z-index: 0;
+            animation: float-particle linear infinite;
+        }
+
+        @keyframes float-particle {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            to {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: rgba(30, 10, 50, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(156, 39, 176, 0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+            overflow: hidden;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        /* Profile Image Section */
+        .profile-section {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #9c27b0;
+            box-shadow: 0 0 30px rgba(156, 39, 176, 0.5);
+            transition: transform 0.3s;
+            background: #2d1b4e;
+        }
+
+        .profile-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(156, 39, 176, 0.7);
+        }
+
+        .profile-name {
+            margin-top: 15px;
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #d8b4fe, #c084fc, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .profile-title {
+            color: #a855f7;
+            font-size: 14px;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        .logo h2 {
+            font-size: 24px;
+            background: linear-gradient(135deg, #d8b4fe, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+        }
+
+        .wallet-status {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .address-badge {
+            background: rgba(156, 39, 176, 0.2);
+            backdrop-filter: blur(5px);
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #d8b4fe;
+            font-weight: 500;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        .verify-badge {
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .verified {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+        }
+
+        .unverified {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .connect-btn {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(156, 39, 176, 0.5);
+        }
+
+        /* Translation Area */
+        .translation-area {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .translation-area {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .glass-card {
+                padding: 24px;
+            }
+        }
+
+        .panel {
+            background: rgba(20, 5, 35, 0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 32px;
+            padding: 24px;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+            transition: all 0.3s;
+        }
+
+        .panel:hover {
+            border-color: rgba(156, 39, 176, 0.6);
+            box-shadow: 0 10px 30px -10px rgba(156, 39, 176, 0.3);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #d8b4fe;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .audio-btn {
+            background: rgba(156, 39, 176, 0.3);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d8b4fe;
+        }
+
+        .audio-btn:hover {
+            background: rgba(156, 39, 176, 0.6);
+            transform: scale(1.05);
+        }
+
+        .lang-badge {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .flag-icon {
+            font-size: 28px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 220px;
+            padding: 18px;
+            font-size: 18px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(156, 39, 176, 0.4);
+            border-radius: 24px;
+            resize: vertical;
+            font-family: 'Poppins', 'Cairo', monospace;
+            transition: all 0.3s;
+            color: #e2e8f0;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #9c27b0;
+            box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
+        }
+
+        textarea::placeholder {
+            color: #6b4e7a;
+        }
+
+        .output-text {
+            background: rgba(0, 0, 0, 0.3);
+            min-height: 220px;
+            padding: 18px;
+            border-radius: 24px;
+            font-size: 18px;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Poppins', 'Cairo', monospace;
+            border: 1px solid rgba(156, 39, 176, 0.4);
+        }
+
+        /* Swap Button */
+        .swap-column {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swap-btn {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            border: none;
+            width: 65px;
+            height: 65px;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 28px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .swap-btn:hover {
+            transform: rotate(180deg) scale(1.05);
+            box-shadow: 0 15px 30px -5px rgba(156, 39, 176, 0.5);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .translate-btn {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            border: none;
+            padding: 16px 48px;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 20px -5px rgba(156, 39, 176, 0.4);
+        }
+
+        .translate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .translate-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -5px rgba(156, 39, 176, 0.6);
+        }
+
+        .clear-btn {
+            background: rgba(156, 39, 176, 0.3);
+            color: #d8b4fe;
+            border: 1px solid rgba(156, 39, 176, 0.5);
+            padding: 16px 32px;
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clear-btn:hover {
+            background: rgba(156, 39, 176, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Status */
+        .transaction-status {
+            background: rgba(156, 39, 176, 0.2);
+            border-left: 5px solid #9c27b0;
+            padding: 18px 24px;
+            border-radius: 20px;
+            margin: 20px 0;
+            backdrop-filter: blur(5px);
+        }
+
+        .status-loading {
+            color: #d8b4fe;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #9c27b0;
+            border-top-color: #d8b4fe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-success {
+            background: rgba(76, 175, 80, 0.2);
+            border-left-color: #4caf50;
+            color: #a5d6a7;
+        }
+
+        .status-error {
+            background: rgba(244, 67, 54, 0.2);
+            border-left-color: #f44336;
+            color: #ef9a9a;
+        }
+
+        /* Stats */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: rgba(156, 39, 176, 0.15);
+            padding: 20px;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #d8b4fe, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-label {
+            color: #a855f7;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        /* Recent */
+        .recent-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        .recent-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #d8b4fe;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .transactions-list {
+            max-height: 350px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tx-item {
+            background: rgba(156, 39, 176, 0.1);
+            padding: 18px;
+            border-radius: 20px;
+            transition: all 0.2s;
+            border: 1px solid rgba(156, 39, 176, 0.2);
+            cursor: pointer;
+        }
+
+        .tx-item:hover {
+            transform: translateX(8px);
+            border-color: #9c27b0;
+            background: rgba(156, 39, 176, 0.2);
+        }
+
+        .tx-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tx-langs {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(156, 39, 176, 0.3);
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #d8b4fe;
+        }
+
+        .tx-time {
+            font-size: 11px;
+            color: #a855f7;
+        }
+
+        .tx-text {
+            margin: 8px 0;
+            color: #cbd5e1;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .tx-text strong {
+            color: #d8b4fe;
+        }
+
+        /* Scrollbar */
+        .transactions-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .transactions-list::-webkit-scrollbar-track {
+            background: rgba(156, 39, 176, 0.2);
+            border-radius: 10px;
+        }
+
+        .transactions-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            border-radius: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            color: #a855f7;
+            font-size: 13px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="glass-card">
+            <!-- Profile Image Section -->
+            <div class="profile-section">
+                <img src="https://raw.githubusercontent.com/3lwamakram100-collab/ArabicTranslator/main/FB_IMG_1777639757869.jpg" 
+                     alt="Ali Profile" 
+                     class="profile-image"
+                     onerror="this.src='https://via.placeholder.com/120x120/2d1b4e/9c27b0?text=Ali'">
+                <div class="profile-name">علي | Ali</div>
+                <div class="profile-title">Verified Translator • Base Blockchain</div>
+            </div>
+
+            <div class="header">
+                <div class="logo">
+                    <h2>🔮 Ali Translation | الترجمة الصوتية</h2>
+                </div>
+                <div class="wallet-status">
+                    <div id="addressDisplay" class="address-badge">🔗 Not Connected</div>
+                    <div id="verifyBadge" class="verify-badge unverified">⚠️ Unverified</div>
+                    <button id="connectBtn" class="connect-btn">🦊 Connect Wallet</button>
+                </div>
+            </div>
+
+            <div class="translation-area">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span class="flag-icon">🇬🇧</span>
+                            <span>English</span>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="audioSourceBtn" class="audio-btn" title="Listen to English">🔊</button>
+                            <div class="lang-badge">Source</div>
+                        </div>
+                    </div>
+                    <textarea id="sourceText" placeholder="Type or paste English text here..."></textarea>
+                </div>
+
+                <div class="swap-column">
+                    <button id="swapBtn" class="swap-btn">🔄</button>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span class="flag-icon">🇸🇦</span>
+                            <span>العربية | Arabic</span>
+                        </div>
+                        <div class="lang-badge">Target</div>
+                    </div>
+                    <div id="outputText" class="output-text" dir="auto">✨ الترجمة ستظهر هنا...<br>Translation will appear here...</div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="clearBtn" class="clear-btn">🗑️ Clear</button>
+                <button id="translateBtn" class="translate-btn">🎤 Translate & Record on Base</button>
+            </div>
+
+            <div id="statusContainer"></div>
+
+            <div class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">Total Translations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="ownerBadge">✓</div>
+                    <div class="stat-label">Owner Status</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">⛓️</div>
+                    <div class="stat-label">Base Network</div>
+                </div>
+            </div>
+
+            <div class="recent-section">
+                <div class="recent-title">📜 Recent On-Chain Translations</div>
+                <div id="transactionsList" class="transactions-list">
+                    <div style="text-align: center; color: #a855f7; padding: 40px;">🔌 Connect wallet to view history</div>
+                </div>
+            </div>
+
+            <div class="footer">
+                ⛓️ <strong>Contract:</strong> 0xe8D1Ae7C5D156075F81995cAA0A070F534d10938<br>
+                🔊 Click the speaker icon to hear English pronunciation • Recorded on Base with minimal gas
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const CONTRACT_ADDRESS = "0xe8D1Ae7C5D156075F81995cAA0A070F534d10938";
+        const OWNER_ADDRESS = "0x9BbE3f747011fEe98DD86DF9eea9DD92FFA89Bac";
+        
+        const CONTRACT_ABI = [
+            {"inputs": [{"internalType": "string","name": "_sourceText","type": "string"},{"internalType": "string","name": "_targetText","type": "string"},{"internalType": "string","name": "_sourceLang","type": "string"},{"internalType": "string","name": "_targetLang","type": "string"}],"name": "recordTranslation","outputs": [{"internalType": "uint256","name": "","type": "uint256"}],"stateMutability": "nonpayable","type": "function"},
+            {"inputs": [],"name": "totalTranslations","outputs": [{"internalType": "uint256","name": "","type": "uint256"}],"stateMutability": "view","type": "function"},
+            {"inputs": [{"internalType": "uint256","name": "_id","type": "uint256"}],"name": "getTranslation","outputs": [{"components": [{"internalType": "uint256","name": "id","type": "uint256"},{"internalType": "string","name": "sourceText","type": "string"},{"internalType": "string","name": "targetText","type": "string"},{"internalType": "string","name": "sourceLang","type": "string"},{"internalType": "string","name": "targetLang","type": "string"},{"internalType": "uint256","name": "timestamp","type": "uint256"},{"internalType": "address","name": "user","type": "address"}],"internalType": "struct Translate.TranslationRecord","name": "","type": "tuple"}],"stateMutability": "view","type": "function"},
+            {"inputs": [],"name": "owner","outputs": [{"internalType": "address","name": "","type": "address"}],"stateMutability": "view","type": "function"}
+        ];
+        
+        // State
+        let provider, signer, contract;
+        let currentAccount = null;
+        let isVerified = false;
+        let currentDirection = "en_to_ar";
+        
+        // DOM Elements
+        const connectBtn = document.getElementById('connectBtn');
+        const addressDisplay = document.getElementById('addressDisplay');
+        const verifyBadge = document.getElementById('verifyBadge');
+        const translateBtn = document.getElementById('translateBtn');
+        const swapBtn = document.getElementById('swapBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const audioSourceBtn = document.getElementById('audioSourceBtn');
+        const sourceTextarea = document.getElementById('sourceText');
+        const outputDiv = document.getElementById('outputText');
+        const statusContainer = document.getElementById('statusContainer');
+        const transactionsList = document.getElementById('transactionsList');
+        const totalCountSpan = document.getElementById('totalCount');
+        
+        // Speech Synthesis for English
+        function speakEnglish(text) {
+            if (!text.trim()) {
+                showStatus("No text to speak", "error");
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+            showStatus("🔊 Playing English pronunciation...", "success");
+            setTimeout(() => {
+                if (statusContainer.innerHTML.includes("Playing English")) {
+                    statusContainer.innerHTML = '';
+                }
+            }, 2000);
+        }
+        
+        // Translation Vocab
+        const enToAr = {
+            "hello": "مرحباً", "hi": "أهلاً", "good morning": "صباح الخير", "good afternoon": "مساء الخير",
+            "good evening": "مساء الخير", "good night": "تصبح على خير", "thank you": "شكراً جزيلاً",
+            "thanks": "شكراً", "please": "من فضلك", "welcome": "أهلاً وسهلاً", "how are you": "كيف حالك",
+            "i am fine": "أنا بخير", "what is your name": "ما اسمك", "my name is": "اسمي",
+            "yes": "نعم", "no": "لا", "ok": "حسناً", "good": "جيد", "bad": "سيء", "beautiful": "جميل",
+            "love": "حب", "peace": "سلام", "world": "العالم", "family": "عائلة", "friend": "صديق",
+            "home": "منزل", "water": "ماء", "food": "طعام", "book": "كتاب", "school": "مدرسة"
+        };
+        
+        const arToEn = {
+            "مرحباً": "Hello", "أهلاً": "Hi", "صباح الخير": "Good morning", "مساء الخير": "Good evening",
+            "تصبح على خير": "Good night", "شكراً": "Thank you", "شكراً جزيلاً": "Thank you very much",
+            "من فضلك": "Please", "أهلاً وسهلاً": "Welcome", "كيف حالك": "How are you", "أنا بخير": "I am fine",
+            "ما اسمك": "What is your name", "اسمي": "My name is", "نعم": "Yes", "لا": "No",
+            "حسناً": "Okay", "جيد": "Good", "سيء": "Bad", "جميل": "Beautiful", "حب": "Love",
+            "سلام": "Peace", "العالم": "World", "عائلة": "Family", "صديق": "Friend"
+        };
+        
+        async function translateEnglishToArabic(text) {
+            if (!text.trim()) return "";
+            try {
+                const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ar`;
+                const response = await axios.get(url);
+                if (response.data?.responseData?.translatedText && !response.data.responseData.translatedText.includes("MYMEMORY WARNING")) {
+                    return response.data.responseData.translatedText.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\[.*?\]/g, '');
+                }
+                throw new Error("API failed");
+            } catch (error) {
+                let result = text;
+                const lowerText = text.toLowerCase();
+                for (const [en, ar] of Object.entries(enToAr)) {
+                    const regex = new RegExp(`\\b${en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+                    result = result.replace(regex, ar);
+                }
+                return result !== text ? result : `📖 ${text} (ترجمة تقريبية)`;
+            }
+        }
+        
+        async function translateArabicToEnglish(text) {
+            if (!text.trim()) return "";
+            try {
+                const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=ar|en`;
+                const response = await axios.get(url);
+                if (response.data?.responseData?.translatedText && !response.data.responseData.translatedText.includes("MYMEMORY WARNING")) {
+                    return response.data.responseData.translatedText.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\[.*?\]/g, '');
+                }
+                throw new Error("API failed");
+            } catch (error) {
+                let result = text;
+                for (const [ar, en] of Object.entries(arToEn)) {
+                    result = result.replace(new RegExp(ar, 'g'), en);
+                }
+                return result !== text ? result : `📖 ${text} (approximate translation)`;
+            }
+        }
+        
+        async function translateText(text, from, to) {
+            if (from === "en" && to === "ar") return await translateEnglishToArabic(text);
+            if (from === "ar" && to === "en") return await translateArabicToEnglish(text);
+            return text;
+        }
+        
+        // Blockchain Functions
+        function updateVerificationStatus(address) {
+            if (!address) {
+                isVerified = false;
+                verifyBadge.innerHTML = "⚠️ Unverified";
+                verifyBadge.className = "verify-badge unverified";
+                translateBtn.disabled = true;
+                document.getElementById('ownerBadge').innerHTML = "❌";
+                return;
+            }
+            const isOwner = address.toLowerCase() === OWNER_ADDRESS.toLowerCase();
+            isVerified = isOwner;
+            if (isOwner) {
+                verifyBadge.innerHTML = "✅ Verified Owner";
+                verifyBadge.className = "verify-badge verified";
+                translateBtn.disabled = false;
+                document.getElementById('ownerBadge').innerHTML = "✓";
+            } else {
+                verifyBadge.innerHTML = "❌ Not Owner";
+                verifyBadge.className = "verify-badge unverified";
+                translateBtn.disabled = true;
+                document.getElementById('ownerBadge').innerHTML = "✗";
+            }
+        }
+        
+        async function connectWallet() {
+            if (!window.ethereum) { alert("Please install MetaMask!"); return; }
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                currentAccount = accounts[0];
+                addressDisplay.innerHTML = `🟢 ${currentAccount.slice(0, 6)}...${currentAccount.slice(-4)}`;
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                updateVerificationStatus(currentAccount);
+                await loadTransactionHistory();
+                await loadTotalCount();
+                window.ethereum.on('accountsChanged', (accounts) => {
+                    if (accounts.length === 0) { currentAccount = null; addressDisplay.innerHTML = "🔗 Not Connected"; updateVerificationStatus(null); }
+                    else { currentAccount = accounts[0]; addressDisplay.innerHTML = `🟢 ${currentAccount.slice(0, 6)}...${currentAccount.slice(-4)}`; updateVerificationStatus(currentAccount); loadTransactionHistory(); loadTotalCount(); }
+                });
+            } catch (error) { console.error(error); alert("Failed to connect wallet"); }
+        }
+        
+        async function loadTotalCount() {
+            if (!contract) return;
+            try { const total = await contract.totalTranslations(); totalCountSpan.textContent = total.toString(); } catch (e) { console.error(e); }
+        }
+        
+        async function loadTransactionHistory() {
+            if (!contract || !isVerified) { transactionsList.innerHTML = '<div style="text-align: center; color: #a855f7; padding: 40px;">🔌 Connect as owner to view history</div>'; return; }
+            try {
+                const total = await contract.totalTranslations();
+                if (total == 0) { transactionsList.innerHTML = '<div style="text-align: center; color: #a855f7; padding: 40px;">📭 No translations yet</div>'; return; }
+                const startIdx = total > 10 ? total - 10 : 0;
+                const items = [];
+                for (let i = total - 1; i >= startIdx; i--) { items.push(await contract.getTranslation(i)); }
+                displayTransactions(items);
+            } catch (error) { console.error(error); transactionsList.innerHTML = '<div style="text-align: center; color: #ef9a9a; padding: 40px;">⚠️ Error loading history</div>'; }
+        }
+        
+        function displayTransactions(records) {
+            if (!records || records.length === 0) { transactionsList.innerHTML = '<div style="text-align: center; color: #a855f7; padding: 40px;">📭 No translations yet</div>'; return; }
+            let html = '';
+            for (const record of records) {
+                const date = new Date(record.timestamp * 1000);
+                html += `<div class="tx-item"><div class="tx-header"><div class="tx-langs">${record.sourceLang.toUpperCase()} → ${record.targetLang.toUpperCase()}</div><div class="tx-time">🕒 ${date.toLocaleString()}</div></div><div class="tx-text"><strong>📝 Source:</strong> ${record.sourceText.substring(0, 70)}${record.sourceText.length > 70 ? '...' : ''}</div><div class="tx-text"><strong>🎯 Target:</strong> ${record.targetText.substring(0, 70)}${record.targetText.length > 70 ? '...' : ''}</div></div>`;
+            }
+            transactionsList.innerHTML = html;
+        }
+        
+        function showStatus(message, type = 'loading') {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'transaction-status';
+            if (type === 'loading') statusDiv.innerHTML = `<div class="status-loading"><div class="spinner"></div><span>${message}</span></div>`;
+            else if (type === 'success') { statusDiv.className = 'transaction-status status-success'; statusDiv.innerHTML = `✅ ${message}`; }
+            else { statusDiv.className = 'transaction-status status-error'; statusDiv.innerHTML = `❌ ${message}`; }
+            statusContainer.innerHTML = '';
+            statusContainer.appendChild(statusDiv);
+            if (type !== 'loading') setTimeout(() => { if (statusContainer.firstChild === statusDiv) statusContainer.innerHTML = ''; }, 4000);
+        }
+        
+        async function translateAndRecord() {
+            const text = sourceTextarea.value.trim();
+            if (!text) { showStatus("Please enter text to translate", "error"); return; }
+            if (!isVerified) { showStatus("Only the verified owner can record", "error"); return; }
+            if (!contract) { showStatus("Please connect wallet first", "error"); return; }
+            
+            showStatus("Translating...", "loading");
+            translateBtn.disabled = true;
+            try {
+                const sourceLang = currentDirection === "en_to_ar" ? "en" : "ar";
+                const targetLang = currentDirection === "en_to_ar" ? "ar" : "en";
+                const translated = await translateText(text, sourceLang, targetLang);
+                outputDiv.textContent = translated;
+                showStatus("Recording on Base blockchain...", "loading");
+                const feeData = await provider.getFeeData();
+                const tx = await contract.recordTranslation(text, translated, sourceLang, targetLang, { gasLimit: 200000, gasPrice: feeData.gasPrice.mul(105).div(100) });
+                showStatus(`⛓️ Tx submitted: ${tx.hash.slice(0, 12)}...`, "loading");
+                await tx.wait();
+                showStatus("✅ Translation recorded on Base!", "success");
+                await loadTransactionHistory();
+                await loadTotalCount();
+                sourceTextarea.value = "";
+                outputDiv.textContent = currentDirection === "en_to_ar" ? "✨ الترجمة ستظهر هنا..." : "✨ Translation will appear here...";
+            } catch (error) {
+                let errorMsg = error.message.includes("user rejected") ? "Transaction rejected" : error.message.includes("insufficient funds") ? "Need ETH on Base" : "Failed: " + error.message.substring(0, 100);
+                showStatus(errorMsg, "error");
+            } finally { translateBtn.disabled = false; }
+        }
+        
+        function swapLanguages() {
+            currentDirection = currentDirection === "en_to_ar" ? "ar_to_en" : "en_to_ar";
+            const currentSource = sourceTextarea.value;
+            const currentOutput = outputDiv.textContent;
+            const isValid = currentOutput && !currentOutput.includes("will appear here") && !currentOutput.includes("ستظهر هنا");
+            if (currentSource && isValid) { sourceTextarea.value = currentOutput; outputDiv.textContent = currentSource; }
+            else { sourceTextarea.value = ""; outputDiv.textContent = currentDirection === "en_to_ar" ? "✨ الترجمة ستظهر هنا..." : "✨ Translation will appear here..."; }
+        }
+        
+        function clearAll() { sourceTextarea.value = ""; outputDiv.textContent = currentDirection === "en_to_ar" ? "✨ الترجمة ستظهر هنا..." : "✨ Translation will appear here..."; showStatus("Cleared!", "success"); }
+        
+        // Event Listeners
+        connectBtn.addEventListener('click', connectWallet);
+        translateBtn.addEventListener('click', translateAndRecord);
+        swapBtn.addEventListener('click', swapLanguages);
+        clearBtn.addEventListener('click', clearAll);
+        audioSourceBtn.addEventListener('click', () => speakEnglish(sourceTextarea.value.trim()));
+        
+        // Floating particles
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.width = Math.random() * 8 + 2 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = Math.random() * 15 + 10 + 's';
+            document.body.appendChild(particle);
+        }
+        
+        if (window.ethereum?.selectedAddress) connectWallet();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</body>
+</html>
